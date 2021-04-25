@@ -1,6 +1,5 @@
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
-# import matplotlib as mpl
 import numpy as np
 import tkinter as tk
 from tkinter import Label, Entry, Button
@@ -31,28 +30,35 @@ class Chart:
 
     def onclick(self, event):
         self.points.append([event.xdata, event.ydata])
-        self.ax.plot(event.xdata, event.ydata, color='black', marker='o')
+        if event.button == 3:
+            self.ax.plot(event.xdata, event.ydata, color='red', marker='o')
+        elif event.button == 1:
+            self.ax.plot(event.xdata, event.ydata, color='blue', marker='o')
         self.fig.canvas.draw()
 
     def drawChart(self, neurons, eval_func):
         x_list = []
         y_list = []
+
         for n in neurons:
-            m = -(n.w1 / n.w2)
-            a = n.bias / n.w2
-            y = m * n.point[0] + a
+            try:
+                m = -(n.w1 / n.w2)
+                a = n.bias / n.w2
+                y = m * n.point[0] + a
+            except ZeroDivisionError:
+                print("ERROR: W2 no puede ser 0")
 
-            x_list.append(n.point[0])
-            y_list.append(y)
+                x_list.append(n.point[0])
+                y_list.append(y)
 
-            if eval_func(n.v) == 0:
-                self.ax.plot(n.point[0], n.point[1], 'ro')
-            else:
-                self.ax.plot(n.point[0], n.point[1], 'bo')
+                if eval_func(n.v) == 0:
+                    self.ax.plot(n.point[0], n.point[1], 'ro')
+                else:
+                    self.ax.plot(n.point[0], n.point[1], 'bo')
 
         self.ax.plot(x_list, y_list, 'g')
         self.fig.canvas.draw()
-        
+
 
 class Application(object):
     def __init__(self, chart, w1, w2, bias):
@@ -66,18 +72,19 @@ class Application(object):
         w1 = int(self.w1.get())
         w2 = int(self.w2.get())
         bias = int(self.bias.get())
-        eval_func = lambda v: 0 if v <= 0 else 1 
+        eval_func = lambda v: 0 if v <= 0 else 1
 
         self.neurons = [Neuron(p, w1, w2, bias) for p in self.chart.points]
         self.chart.drawChart(self.neurons, eval_func)
 
     def reset(self):
-        self.neurons = []
+        self.chart.points = []
         self.chart.ax.clear()
         self.chart.ax.set_xlim([-10, 10])
         self.chart.ax.set_ylim([-10, 10])
         self.chart.ax.grid(True)
         self.chart.fig.canvas.draw()
+
 
 def main():
     fig = Figure(figsize=(5, 5))
@@ -109,7 +116,7 @@ def main():
     Label(window, text="Bias").grid(row=2, column=0)
     Entry(window, textvariable=bias).grid(row=2, column=1, pady=5, padx=5)
 
-    # Create main application
+    # Create main app
     chart = Chart(ax, fig)
     app = Application(chart, w1, w1, bias)
 
