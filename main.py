@@ -70,9 +70,9 @@ class Application(object):
 class Perceptron:
     def __init__(self,
                  no_of_inputs=2,
-                 learning_rate=0.1,
+                 learning_rate=0.05,
                  umbral=0,
-                 max_epochs=50):
+                 max_epochs=5000):
         self.inputs = []
         self.umbral = umbral
         self.max_epochs = max_epochs
